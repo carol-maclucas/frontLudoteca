@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -33,6 +33,7 @@ export class AuthorListPage implements OnInit {
 
   dataSource = new MatTableDataSource<Author>();
   displayedColumns: string[] = ['id', 'name', 'nationality', 'action'];
+  protected readonly errorMessage = signal<string | null>(null);
 
   constructor(private authorService: AuthorService, public dialog: MatDialog) {}
 
@@ -42,6 +43,7 @@ export class AuthorListPage implements OnInit {
     }
 
     loadPage(event?: PageEvent) {
+      this.errorMessage.set(null);
       const pageable: Pageable = {
         pageNumber: this.pageNumber,
         pageSize: this.pageSize,
@@ -58,11 +60,14 @@ export class AuthorListPage implements OnInit {
           pageable.pageNumber = event.pageIndex;
       }
 
-      this.authorService.getAuthors(pageable).subscribe((data) => {
+      this.authorService.getAuthors(pageable).subscribe({
+        next: (data) => {
           this.dataSource.data = data.content;
           this.pageNumber = data.pageable.pageNumber;
           this.pageSize = data.pageable.pageSize;
           this.totalElements = data.totalElements;
+        },
+        error: () => this.errorMessage.set('No se pudieron cargar los autores.'),
       });
     }
 
@@ -97,8 +102,10 @@ export class AuthorListPage implements OnInit {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                this.authorService.deleteAuthor(author.id).subscribe((result) => {
-                    this.ngOnInit();
+                this.errorMessage.set(null);
+                this.authorService.deleteAuthor(author.id).subscribe({
+                    next: () => this.loadPage(),
+                    error: () => this.errorMessage.set('No se pudo eliminar el autor.'),
                 });
             }
         });

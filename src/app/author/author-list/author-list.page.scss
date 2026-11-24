@@ -1,6 +1,10 @@
 .container {
     margin: 20px;
 
+    .error-message {
+        color: red;
+    }
+
     mat-table {
         margin-top: 10px;
         margin-bottom: 20px;

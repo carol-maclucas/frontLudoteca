@@ -63,6 +63,7 @@ export class LoanListPage implements OnInit {
   protected readonly filterClientId = signal<number | null>(null);
   protected readonly filterDate = signal<Date | null>(null);
   protected readonly filterError = signal<string | null>(null);
+  protected readonly listError = signal<string | null>(null);
 
     // Al iniciar la página
     ngOnInit(): void {
@@ -79,6 +80,7 @@ export class LoanListPage implements OnInit {
     }
   
     loadPage(event?: PageEvent) {
+      this.listError.set(null);
       //Paginado
       const pageable: Pageable = {
         pageNumber: this.pageNumber,
@@ -101,11 +103,14 @@ export class LoanListPage implements OnInit {
       const date = this.filterDate();
 
       this.loanService.getLoans(pageable, gameId, clientId, date)
-      .subscribe((data) => {
+      .subscribe({
+        next: (data) => {
           this.dataSource.data = data.content;
           this.pageNumber = data.pageable.pageNumber;
           this.pageSize = data.pageable.pageSize;
           this.totalElements = data.totalElements;
+        },
+        error: () => this.listError.set('No se pudieron cargar los préstamos.'),
       });
     
     }
@@ -154,9 +159,11 @@ export class LoanListPage implements OnInit {
       
       dialogRef.afterClosed().subscribe((result) => {
         if (result) {
-          this.loanService.deleteLoan(loan.id).subscribe((result) => {
-          this.onSearch();
-        });
+          this.listError.set(null);
+          this.loanService.deleteLoan(loan.id).subscribe({
+            next: () => this.onSearch(),
+            error: () => this.listError.set('No se pudo eliminar el préstamo.'),
+          });
         }
       });
     }

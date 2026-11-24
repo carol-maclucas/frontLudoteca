@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Category } from '../model/category';
 import { CommonModule } from '@angular/common';
@@ -29,6 +29,7 @@ export class CategoryListPage implements OnInit {
     //Inyeccion moderna
     protected readonly categoryService = inject(CategoryService);
     protected readonly dialog = inject(MatDialog);
+    protected readonly errorMessage = signal<string | null>(null);
     
     // EDITAR CATEGORIA
     createCategory() {    
@@ -62,9 +63,11 @@ export class CategoryListPage implements OnInit {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          this.categoryService.deleteCategory(category.id).subscribe(result => {
-            this.loadData();
-          }); 
+          this.errorMessage.set(null);
+          this.categoryService.deleteCategory(category.id).subscribe({
+            next: () => this.loadData(),
+            error: () => this.errorMessage.set('No se pudo eliminar la categoría.'),
+          });
         }
       });
     }  
@@ -75,8 +78,11 @@ export class CategoryListPage implements OnInit {
     }
     // Cargar datos
     loadData(): void {
-        this.categoryService.getCategories().subscribe( 
-          categories => {this.dataSource.data = categories;});
+        this.errorMessage.set(null);
+        this.categoryService.getCategories().subscribe({
+          next: (categories) => this.dataSource.data = categories,
+          error: () => this.errorMessage.set('No se pudieron cargar las categorías.'),
+        });
     }
 }
 

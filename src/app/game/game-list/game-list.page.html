@@ -1,6 +1,10 @@
 <div class="container">
     <h1>Catálogo de juegos</h1>
 
+    @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+    }
+
     <div class="filters">
         <form>
             <mat-form-field>

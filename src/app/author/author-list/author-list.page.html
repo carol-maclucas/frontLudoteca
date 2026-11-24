@@ -1,6 +1,10 @@
 <div class="container">
     <h1>Listado de Autores</h1>
 
+    @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+    }
+
     <mat-table [dataSource]="dataSource"> 
         <ng-container matColumnDef="id"> <!-- definimos la columna1 Id-->
             <mat-header-cell *matHeaderCellDef> Identificador </mat-header-cell>

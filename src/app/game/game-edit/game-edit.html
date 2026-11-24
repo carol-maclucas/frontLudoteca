@@ -5,6 +5,10 @@
         <h1>Crear juego</h1>
     }
 
+    @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+    }
+
     <form>
         <mat-form-field>
             <mat-label>Identificador</mat-label>

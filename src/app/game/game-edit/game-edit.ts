@@ -36,6 +36,7 @@ export class GameEdit implements OnInit {
   protected readonly authorId = signal<number | null>(null);
   protected readonly categories = signal<Category[]>([]);
   protected readonly authors = signal<Author[]>([]);
+  protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly dialogRef = inject(MatDialogRef<GameEdit>);
   protected readonly data = inject(MAT_DIALOG_DATA);
@@ -54,16 +55,22 @@ export class GameEdit implements OnInit {
     this.title.set(initialData?.title ?? null);
     this.age.set(initialData?.age ?? null);
 
-    this.categoryService.getCategories().subscribe((cats) => {
-      this.categories.set(cats);
-      this.categoryId.set(initialData?.category?.id ?? null);
+    this.categoryService.getCategories().subscribe({
+      next: (cats) => {
+        this.categories.set(cats);
+        this.categoryId.set(initialData?.category?.id ?? null);
+      },
+      error: () => this.errorMessage.set('No se pudieron cargar las categorías.'),
     });
 
-    this.authorService.getAllAuthors().subscribe((auts) => {
-      this.authors.set(auts);
-      this.authorId.set(initialData?.author?.id ?? null);
-      });
-    }
+    this.authorService.getAllAuthors().subscribe({
+      next: (auts) => {
+        this.authors.set(auts);
+        this.authorId.set(initialData?.author?.id ?? null);
+      },
+      error: () => this.errorMessage.set('No se pudieron cargar los autores.'),
+    });
+  }
 
   onSave() {
     const id = this.id();

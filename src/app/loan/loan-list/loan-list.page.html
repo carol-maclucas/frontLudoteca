@@ -33,6 +33,9 @@
             <p class="filter-error">{{filterError()}}</p>
         }
     </div>
+    @if (listError()) {
+        <p class="list-error">{{listError()}}</p>
+    }
     <mat-table [dataSource]="dataSource"> 
         <ng-container matColumnDef="id"> <!-- definimos la columna1 Id-->
             <mat-header-cell *matHeaderCellDef> Identificador </mat-header-cell>

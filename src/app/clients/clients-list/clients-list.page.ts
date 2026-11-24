@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Clients } from '../model/Clients';
 import { CommonModule } from '@angular/common';
@@ -29,15 +29,18 @@ export class ClientsListPage implements OnInit {
   // Inyección
   protected readonly clientsService = inject(ClientsService);
   protected readonly dialog = inject(MatDialog);
+  protected readonly errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadData();
   }
 
   loadData(): void {
-    this.clientsService.getClients().subscribe(
-      clients => {this.dataSource.data = clients;}
-    );
+    this.errorMessage.set(null);
+    this.clientsService.getClients().subscribe({
+      next: (clients) => this.dataSource.data = clients,
+      error: () => this.errorMessage.set('No se pudieron cargar los clientes.'),
+    });
   }
 
   // Crear cliente
@@ -74,9 +77,11 @@ export class ClientsListPage implements OnInit {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          this.clientsService.deleteClient(clients.id).subscribe(result => {
-            this.loadData();
-          }); 
+          this.errorMessage.set(null);
+          this.clientsService.deleteClient(clients.id).subscribe({
+            next: () => this.loadData(),
+            error: () => this.errorMessage.set('No se pudo eliminar el cliente.'),
+          });
         }
       });    
     }

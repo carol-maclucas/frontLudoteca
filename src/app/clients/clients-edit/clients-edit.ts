@@ -59,9 +59,16 @@ export class ClientsEdit implements OnInit {
     this.clientsService.saveClient(client).subscribe({
       next: () => this.dialogRef.close(true),
       error: (error) => {
-        const detail = typeof error.error === 'string' ? error.error : error.error?.message ?? '';
+        const body = error.error;
+        const detail = typeof body === 'string'
+          ? body
+          : [body?.message, body?.error, body?.detail, body?.title]
+            .filter((value): value is string => typeof value === 'string')
+            .join(' ');
+        const duplicateName = error.status === 409
+          || /ya existe|ya está en uso|ya esta en uso|duplicad|duplicate|already exists|already taken|unique constraint|unique violation|nombre.*(registrad|usad)/i.test(detail);
 
-        if (error.status === 409 || /ya existe|duplicad/i.test(detail)) {
+        if (duplicateName) {
           this.nameError.set('El nombre ya existe, pruebe otro.');
           this.nameControl?.control.setErrors({ duplicate: true });
         } else if (error.status === 400) {
@@ -69,8 +76,10 @@ export class ClientsEdit implements OnInit {
           this.nameControl?.control.setErrors({ server: true });
         } else if (error.status === 0) {
           this.nameError.set('No se pudo conectar con el servidor.');
+          this.nameControl?.control.setErrors({ server: true });
         } else {
           this.nameError.set('No se pudo guardar el cliente. Inténtalo de nuevo.');
+          this.nameControl?.control.setErrors({ server: true });
         }
         this.nameControl?.control.markAsTouched();
       }

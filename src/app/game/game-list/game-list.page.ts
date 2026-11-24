@@ -39,6 +39,7 @@ export class GameListPage implements OnInit {
   // Variables de filtro
   protected readonly filterCategory = signal<Category | null>(null);
   protected readonly filterTitle = signal<string>('');
+  protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly gameService = inject(GameService);
   protected readonly categoryService = inject(CategoryService);
@@ -46,10 +47,12 @@ export class GameListPage implements OnInit {
 
   // Al iniciar la página, se cargan los juegos y las categorías
   ngOnInit(): void {
-    this.gameService.getGames().subscribe((games) => this.games.set(games));
-
-    this.categoryService.getCategories().subscribe((categories) => this.categories.set(categories));
-    }
+    this.onSearch();
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => this.categories.set(categories),
+      error: () => this.errorMessage.set('No se pudieron cargar las categorías.'),
+    });
+  }
 
   // Limpiar los filtros y realizar la búsqueda
   onCleanFilter(): void {
@@ -63,10 +66,14 @@ export class GameListPage implements OnInit {
     const title = this.filterTitle();
     const categoryId = this.filterCategory() != null ? this.filterCategory().id : null;
 
+    this.errorMessage.set(null);
     this.gameService
       .getGames(title, categoryId)
-      .subscribe((games) => this.games.set(games));
-    }
+      .subscribe({
+        next: (games) => this.games.set(games),
+        error: () => this.errorMessage.set('No se pudieron cargar los juegos.'),
+      });
+  }
 
     createGame() {
         const dialogRef = this.dialog.open(GameEdit, {

@@ -3,6 +3,10 @@
     max-width: 500px;
     padding: 20px;
 
+    .error-message {
+        color: red;
+    }
+
     form {
         display: flex;
         flex-direction: column;
