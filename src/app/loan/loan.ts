@@ -6,6 +6,7 @@ import { Loan } from './model/Loan';
 import { PaginatedData } from '../core/model/page/PaginatedData';
 // import { LOANS } from './model/mock-loans-list';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 function formatLocalDate(date: Date): string {
     const year = date.getFullYear();
@@ -22,7 +23,7 @@ export class LoanService {
 
     // Inyección del HttpClient
     protected readonly http = inject(HttpClient);
-    private baseUrl = 'http://localhost:8080/loan';
+    private baseUrl = `${environment.apiUrl}/loan`;
 
     getLoans(pageable: Pageable, gameId?: number, clientId?: number, date?: Date, ):
      Observable<PaginatedData<Loan>> {

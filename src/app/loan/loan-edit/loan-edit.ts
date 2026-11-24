@@ -58,7 +58,7 @@ export class LoanEdit implements OnInit {
     this.startDate.set(initialData?.startDate ? new Date(initialData.startDate) : null);
     this.endDate.set(initialData?.endDate ? new Date(initialData.endDate) : null);
 
-    this.gameService.getAllGames().subscribe({
+    this.gameService.getGames().subscribe({
       next: (games) => {
         this.games.set(games);
         if (games.length === 0) {
@@ -69,7 +69,7 @@ export class LoanEdit implements OnInit {
       },
       error: () => this.errorMessage.set('No se pudieron cargar los juegos. Comprueba que el servidor esté activo.'),
     });
-    this.clientService.getAllClients().subscribe({
+    this.clientService.getClients().subscribe({
       next: (clients) => {
         this.clients.set(clients);
         if (clients.length === 0) {
@@ -94,12 +94,16 @@ export class LoanEdit implements OnInit {
   
     // Validar campos requeridos
     if (!validateFields(data, requiredFields)) {
+      this.errorMessage.set("Completa el juego, el cliente y ambas fechas.");
       return;
     }
 
-    // Comprobar que la fecha de fin no sea anterior a la fecha de inicio
-    if (endDate! < startDate!){
-      this.errorMessage.set("La fecha de fin no puede ser anterior a la fecha de inicio.");
+    // Rechazar fechas anteriores o iguales, devolución solo posterior
+    const startDay = new Date(startDate!.getFullYear(), startDate!.getMonth(), startDate!.getDate()).getTime();
+    const endDay = new Date(endDate!.getFullYear(), endDate!.getMonth(), endDate!.getDate()).getTime();
+
+    if (endDay <= startDay){
+      this.errorMessage.set("La fecha de fin debe ser posterior a la fecha de inicio.");
       return;
     }
   
@@ -123,9 +127,15 @@ export class LoanEdit implements OnInit {
       next: () => this.dialogRef.close(true),
       error: (error) => {
         const detail = typeof error.error === 'string' ? error.error : error.error?.message ?? '';
-        this.errorMessage.set(error.status === 400 || error.status === 409 || error.status === 500 || /prestado/i.test(detail)
-          ? 'El juego ya está prestado en esas fechas escogidas.'
-          : 'No se pudo guardar el préstamo.');
+        if (error.status === 409 || /ya.+prestado|solap/i.test(detail)) {
+          this.errorMessage.set('El juego ya está prestado en esas fechas.');
+        } else if (error.status === 400) {
+          this.errorMessage.set(detail || 'Los datos del préstamo no son válidos.');
+        } else if (error.status === 0) {
+          this.errorMessage.set('No se pudo conectar con el servidor.');
+        } else {
+          this.errorMessage.set('No se pudo guardar el préstamo. Inténtalo de nuevo.');
+        }
       },
     });
     }

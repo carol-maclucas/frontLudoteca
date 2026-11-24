@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { Observable, of } from 'rxjs';
 import { Category } from './model/category';
 //import { CATEGORY_DATA } from './model/mock-categories';
@@ -11,8 +12,8 @@ export class CategoryService {
     constructor() { }
 
     protected readonly http = inject(HttpClient);
-    private baseUrl = 'http://localhost:8080/category';
-    // Configuramos "app.config.ts" para que la URL base de la API sea configurable
+    private baseUrl = `${environment.apiUrl}/category`;
+    // La URL base de la API se configura por entorno
     // Permite cambiar la URL de la API sin tener que modificar el código fuente del servicio
 
     //mockear datos de Categorias
@@ -30,10 +31,8 @@ export class CategoryService {
     }
 
     //ELIMINAR CATEGORIA
-    // Lo de dentro de Observable<any> es el tipo de dato que devuelve la función, 
-    // en este caso un observable de cualquier tipo
-    deleteCategory(idCategory: number): Observable<any> { 
-       return this.http.delete(`${this.baseUrl}/${idCategory}`)
+    deleteCategory(idCategory: number): Observable<void> {
+       return this.http.delete<void>(`${this.baseUrl}/${idCategory}`);
     }
 
     getAllCategories(): Observable<Category[]> {

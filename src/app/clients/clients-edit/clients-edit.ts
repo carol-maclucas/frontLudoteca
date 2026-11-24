@@ -47,17 +47,31 @@ export class ClientsEdit implements OnInit {
   onSave() {
     const id = this.id();
     const name = this.name();
-    if(!name) { // Si el nombre es nulo, no hacer nada
+    if (!name?.trim()) {
+      this.nameError.set('El nombre no puede estar vacío.');
+      this.nameControl?.control.setErrors({ required: true });
+      this.nameControl?.control.markAsTouched();
       return;
     }
 
-    const client = { id, name } as Clients;
+    const client = { id, name: name.trim() } as Clients;
     
     this.clientsService.saveClient(client).subscribe({
       next: () => this.dialogRef.close(true),
-      error: () => {
-        this.nameError.set('El nombre ya existe, pruebe otro.');
-        this.nameControl?.control.setErrors({ server: true });
+      error: (error) => {
+        const detail = typeof error.error === 'string' ? error.error : error.error?.message ?? '';
+
+        if (error.status === 409 || /ya existe|duplicad/i.test(detail)) {
+          this.nameError.set('El nombre ya existe, pruebe otro.');
+          this.nameControl?.control.setErrors({ duplicate: true });
+        } else if (error.status === 400) {
+          this.nameError.set(detail || 'El nombre no es válido.');
+          this.nameControl?.control.setErrors({ server: true });
+        } else if (error.status === 0) {
+          this.nameError.set('No se pudo conectar con el servidor.');
+        } else {
+          this.nameError.set('No se pudo guardar el cliente. Inténtalo de nuevo.');
+        }
         this.nameControl?.control.markAsTouched();
       }
     });

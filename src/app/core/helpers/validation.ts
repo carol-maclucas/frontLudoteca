@@ -1,5 +1,5 @@
 export function validateFields(
-    data: Record<string, any>,
+    data: Record<string, unknown>,
     requiredFields: readonly string[]
 ): boolean {
 

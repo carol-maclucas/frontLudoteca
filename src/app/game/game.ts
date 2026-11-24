@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Game } from './model/Game';
-import { GAME_DATA } from './model/mock-games';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +10,7 @@ import { HttpClient } from '@angular/common/http';
 export class GameService {
     // Inyección del HttpClient
     protected readonly http = inject(HttpClient);
-    private baseUrl = 'http://localhost:8080/game';
+    private baseUrl = `${environment.apiUrl}/game`;
 
     getGames(title?: string, categoryId?: number): Observable<Game[]> {
         return this.http.get<Game[]>(this.composeFindUrl(title, categoryId));
@@ -21,10 +21,6 @@ export class GameService {
         const url = id ? `${this.baseUrl}/${id}` : this.baseUrl;
 
         return this.http.put<void>(url, game);
-    }
-
-    getAllGames(): Observable<Game[]> {
-        return of(GAME_DATA);
     }
 
     private composeFindUrl(title?: string, categoryId?: number): string {

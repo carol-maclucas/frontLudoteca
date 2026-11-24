@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Clients } from './model/Clients';
 import { HttpClient } from '@angular/common/http';
-import { CLIENTS_DATA } from './model/mock-clients';
+import { environment } from '../../environments/environment';
 
 // Era mejor hacerlo todo con "Client" en singular pero para no romper el código 
 // ya existente, lo ha dejado como "Clients"
@@ -13,7 +13,7 @@ export class ClientsService {
     constructor() { }
 
     protected readonly http = inject(HttpClient);
-    private baseUrl = 'http://localhost:8080/clients';
+    private baseUrl = `${environment.apiUrl}/clients`;
 
     getClients(): Observable<Clients[]> {
         return this.http.get<Clients[]>(this.baseUrl);
@@ -25,11 +25,7 @@ export class ClientsService {
         return this.http.put<Clients>(url, client);
     }
 
-    getAllClients(): Observable<Clients[]> {
-        return of(CLIENTS_DATA);
-    }
-
-    deleteClient(idClient: number): Observable<any> {
-        return this.http.delete(`${this.baseUrl}/${idClient}`)
+    deleteClient(idClient: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/${idClient}`);
     }
 }
