@@ -89,19 +89,12 @@ export class ClientsListPage implements OnInit {
               : [body?.message, body?.error, body?.detail, body?.title]
                 .filter((value): value is string => typeof value === 'string')
                 .join(' ');
-            const activeLoanConflict = error.status === 409
-              && /pr[eé]stamos?\s+(activos?|vigentes?)/i.test(detail);
-
-            if (activeLoanConflict) {
+            if (error.status === 409) {
               dialogRef.componentInstance.setError(
                 'No se puede eliminar el cliente porque tiene préstamos activos.'
               );
             } else if (error.status === 0) {
               dialogRef.componentInstance.setError('No se pudo conectar con el servidor.');
-            } else if (error.status === 409) {
-              dialogRef.componentInstance.setError(
-                detail || 'No se puede eliminar el cliente por un conflicto con datos relacionados.'
-              );
             } else {
               dialogRef.componentInstance.setError(
                 detail || 'No se pudo eliminar el cliente. Inténtalo de nuevo.'
