@@ -26,7 +26,7 @@
             </mat-form-field>
         <div class="buttons">
             <button mat-stroked-button (click)="onCleanFilter()">Limpiar</button>
-            <button mat-stroked-button (click)="onSearch()">Filtrar</button>
+            <button mat-flat-button color="primary" (click)="onSearch()">Filtrar</button>
         </div>
         </form>
         @if (filterError()) {
@@ -65,10 +65,10 @@
         <ng-container matColumnDef="action">
             <mat-header-cell *matHeaderCellDef><!--(Columna acciones sin nombre)--></mat-header-cell>
             <mat-cell *matCellDef="let element">
-                <button mat-icon-button style="color:rgb(10, 90, 155)" (click)="editLoan(element)">
+                <button mat-icon-button aria-label="Editar préstamo" style="color:rgb(10, 90, 155)" (click)="editLoan(element)">
                     <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button style="color:rgb(209, 28, 28)" (click)="deleteLoan(element)">
+                <button mat-icon-button aria-label="Eliminar préstamo" style="color:rgb(209, 28, 28)" (click)="deleteLoan(element)">
                     <mat-icon>clear</mat-icon>
                 </button>
             </mat-cell>

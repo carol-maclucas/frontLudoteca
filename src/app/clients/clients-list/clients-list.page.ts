@@ -75,14 +75,16 @@ export class ClientsListPage implements OnInit {
         description: "Atención si borra el cliente se perderán sus datos.<br> ¿Desea eliminar el cliente?" }
       });
 
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.errorMessage.set(null);
-          this.clientsService.deleteClient(clients.id).subscribe({
-            next: () => this.loadData(),
-            error: () => this.errorMessage.set('No se pudo eliminar el cliente.'),
-          });
-        }
-      });    
+      dialogRef.componentInstance.confirmRequested.subscribe(() => {
+        this.clientsService.deleteClient(clients.id).subscribe({
+          next: () => {
+            dialogRef.close(true);
+            this.loadData();
+          },
+          error: () => dialogRef.componentInstance.setError(
+            'No se ha podido eliminar el cliente porque tiene préstamos activos.'
+          ),
+        });
+      });
     }
 }

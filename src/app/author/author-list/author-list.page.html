@@ -24,10 +24,10 @@
         <ng-container matColumnDef="action">
             <mat-header-cell *matHeaderCellDef><!--(Columna acciones sin nombre)--></mat-header-cell>
             <mat-cell *matCellDef="let element"> <!--se ponen en paralelo verticalmente-->
-                <button mat-icon-button style="color:rgb(10, 90, 155)" (click)="editAuthor(element)">
+                <button mat-icon-button aria-label="Editar autor" style="color:rgb(10, 90, 155)" (click)="editAuthor(element)">
                     <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button style="color:rgb(209, 28, 28)" (click)="deleteAuthor(element)">
+                <button mat-icon-button aria-label="Eliminar autor" style="color:rgb(209, 28, 28)" (click)="deleteAuthor(element)">
                     <mat-icon>clear</mat-icon>
                 </button>
             </mat-cell>

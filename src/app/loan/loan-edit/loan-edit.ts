@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -39,6 +39,14 @@ export class LoanEdit implements OnInit {
   protected readonly endDate = signal<Date | null>(null);
   protected readonly games = signal<Game[]>([]);
   protected readonly clients = signal<Clients[]>([]);
+  protected readonly minEndDate = computed(() => {
+    const startDate = this.startDate();
+    return startDate ? this.addDays(startDate, 1) : this.today;
+  });
+  protected readonly maxEndDate = computed(() => {
+    const startDate = this.startDate();
+    return startDate ? this.addDays(startDate, this.MAX_LOAN_DAYS) : null;
+  });
   // Inyección
   protected readonly dialogRef = inject(MatDialogRef<LoanEdit>);
   protected readonly data = inject(MAT_DIALOG_DATA);
@@ -49,6 +57,9 @@ export class LoanEdit implements OnInit {
   // Validación
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly today = new Date();
+
+  private readonly MAX_LOAN_DAYS = 14;
+
   ngOnInit(): void {
     this.loadFormData(this.data.loan ?? null);
   }
@@ -107,12 +118,9 @@ export class LoanEdit implements OnInit {
       return;
     }
   
-    // 14 días máximo de préstamo
-    const dif = endDate!.getTime() - startDate!.getTime();
-    const diferenciaEnDias = dif / (1000 * 60 * 60 * 24);
-
-    if (diferenciaEnDias > 14) {
-      this.errorMessage.set("EL préstamo no puede exceder los 14 días.");
+    const maxEndDay = this.addDays(startDate!, this.MAX_LOAN_DAYS).getTime();
+    if (endDay > maxEndDay) {
+      this.errorMessage.set(`El préstamo no puede exceder los ${this.MAX_LOAN_DAYS} días.`);
       return;
     }
     
@@ -139,6 +147,12 @@ export class LoanEdit implements OnInit {
       },
     });
     }
+
+  private addDays(date: Date, days: number): Date {
+    const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    result.setDate(result.getDate() + days);
+    return result;
+  }
   
     onClose() {
       this.dialogRef.close();

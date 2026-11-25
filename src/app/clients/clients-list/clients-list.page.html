@@ -19,8 +19,8 @@
         <ng-container matColumnDef="action"> <!-- definimos la columna3 action-->
             <mat-header-cell *matHeaderCellDef> <!--(Columna acciones sin nombre)--></mat-header-cell>
             <mat-cell *matCellDef="let element"> <!--se ponen en paralelo verticalmente-->
-                <button mat-icon-button style="color:rgb(10, 90, 155)" (click)="editClient(element)"><mat-icon>edit</mat-icon></button>
-                <button mat-icon-button style="color:rgb(209, 28, 28)" (click)="deleteClient(element)"><mat-icon>clear</mat-icon></button>
+                <button mat-icon-button aria-label="Editar cliente" style="color:rgb(10, 90, 155)" (click)="editClient(element)"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button aria-label="Eliminar cliente" style="color:rgb(209, 28, 28)" (click)="deleteClient(element)"><mat-icon>clear</mat-icon></button>
             </mat-cell>
         </ng-container>
 

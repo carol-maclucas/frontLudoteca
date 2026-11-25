@@ -1,10 +1,19 @@
 .container {
-    min-width: 350px;
-    max-width: 500px;
+    width: 390px;
+    max-width: calc(100vw - 48px);
+    box-sizing: border-box;
     padding: 20px;
 
     .description {
       margin-bottom: 20px;
+    }
+
+    .error-message {
+      color: #b00020;
+      max-width: 100%;
+      margin: 0 0 20px;
+      overflow-wrap: anywhere;
+      overflow-wrap: anywhere;
     }
 
     .buttons {
