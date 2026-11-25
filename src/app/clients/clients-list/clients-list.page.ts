@@ -9,6 +9,7 @@ import { ClientsService } from '../clients';
 import { MatDialog } from '@angular/material/dialog';
 import { ClientsEdit } from '../clients-edit/clients-edit';
 import { DialogConfirmation } from '../../core/dialog-confirmation/dialog-confirmation';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-clients-list',
@@ -81,9 +82,32 @@ export class ClientsListPage implements OnInit {
             dialogRef.close(true);
             this.loadData();
           },
-          error: () => dialogRef.componentInstance.setError(
-            'No se ha podido eliminar el cliente porque tiene préstamos activos.'
-          ),
+          error: (error: HttpErrorResponse) => {
+            const body = error.error;
+            const detail = typeof body === 'string'
+              ? body
+              : [body?.message, body?.error, body?.detail, body?.title]
+                .filter((value): value is string => typeof value === 'string')
+                .join(' ');
+            const activeLoanConflict = error.status === 409
+              && /pr[eé]stamos?\s+(activos?|vigentes?)/i.test(detail);
+
+            if (activeLoanConflict) {
+              dialogRef.componentInstance.setError(
+                'No se puede eliminar el cliente porque tiene préstamos activos.'
+              );
+            } else if (error.status === 0) {
+              dialogRef.componentInstance.setError('No se pudo conectar con el servidor.');
+            } else if (error.status === 409) {
+              dialogRef.componentInstance.setError(
+                detail || 'No se puede eliminar el cliente por un conflicto con datos relacionados.'
+              );
+            } else {
+              dialogRef.componentInstance.setError(
+                detail || 'No se pudo eliminar el cliente. Inténtalo de nuevo.'
+              );
+            }
+          },
         });
       });
     }
